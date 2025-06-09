@@ -16,38 +16,42 @@ app.get("/products", (req: Request, resp: Response)=>{
 
 })
 
-// Interfaz para los query parameters
-interface SearchQuery {
-    name?: string;
-    maxPrice?: string;
-  }
-  
-  // Endpoint de búsqueda
-  app.get('/products/search', (req: Request<{}, Producto[], {}, SearchQuery>, res: Response<Producto[]>) => {
-    const { name, maxPrice } = req.query;
+  app.get('/products/search', (req: Request, resp: Response) => {
+    const name = req.query.name as string
+    const maxPrice = req.query.maxPrice as string
     
     let filteredProducts = listaProductos;
     
     // Filtrar por nombre si se proporciona
-    if (name) {
+    if (name != undefined) {
       filteredProducts = filteredProducts.filter(product => 
         product.name.toLowerCase().includes(name.toLowerCase())
       );
+    } else {
+        resp.status(400).json({
+            msg : "debe incluir el parametro name"
+        })
+        return
     }
     
     // Filtrar por precio máximo si se proporciona
-    if (maxPrice) {
+    if (maxPrice != undefined) {
       const maxPriceNum = parseFloat(maxPrice);
-      
-      // Validar que sea un número válido
+      // Validar que sea un numero
       if (!isNaN(maxPriceNum)) {
         filteredProducts = filteredProducts.filter(product => 
           product.price <= maxPriceNum
         );
       }
+    } else {
+        resp.status(400).json({
+            msg : "debe incluir el parametro max price"
+        })
+        return
     }
     
-    res.json(filteredProducts);
+    
+    resp.json(filteredProducts);
   });
 
 app.get("/products/:id", (req: Request, resp: Response)=>{
