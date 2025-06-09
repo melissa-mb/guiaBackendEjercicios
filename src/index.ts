@@ -16,6 +16,40 @@ app.get("/products", (req: Request, resp: Response)=>{
 
 })
 
+// Interfaz para los query parameters
+interface SearchQuery {
+    name?: string;
+    maxPrice?: string;
+  }
+  
+  // Endpoint de búsqueda
+  app.get('/products/search', (req: Request<{}, Producto[], {}, SearchQuery>, res: Response<Producto[]>) => {
+    const { name, maxPrice } = req.query;
+    
+    let filteredProducts = listaProductos;
+    
+    // Filtrar por nombre si se proporciona
+    if (name) {
+      filteredProducts = filteredProducts.filter(product => 
+        product.name.toLowerCase().includes(name.toLowerCase())
+      );
+    }
+    
+    // Filtrar por precio máximo si se proporciona
+    if (maxPrice) {
+      const maxPriceNum = parseFloat(maxPrice);
+      
+      // Validar que sea un número válido
+      if (!isNaN(maxPriceNum)) {
+        filteredProducts = filteredProducts.filter(product => 
+          product.price <= maxPriceNum
+        );
+      }
+    }
+    
+    res.json(filteredProducts);
+  });
+
 app.get("/products/:id", (req: Request, resp: Response)=>{
     const id = req.params.id
     /*
@@ -50,6 +84,8 @@ app.get("/products/:id", (req: Request, resp: Response)=>{
     
 
 })
+
+
 
 /* EJERCICIO 3 ----------------------------------------------*/
 let numVisitas = 0
